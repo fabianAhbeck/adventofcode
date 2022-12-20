@@ -1,9 +1,18 @@
 use std::fs;
+use ndarray::arr2;
 
+#[derive(PartialEq, Eq, Copy, Clone)]
 enum Choice {
     Rock,
     Paper,
     Scissor,
+}
+
+#[derive(Copy, Clone)]
+enum Result {
+    Loss = 0,
+    Draw = 1,
+    Win = 2,
 }
 
 impl Choice{
@@ -12,8 +21,7 @@ impl Choice{
             Choice::Rock => return 1,
             Choice::Paper => return 2,
             Choice::Scissor => return 3,
-        }
-    }
+        } }
     fn new(x: char) -> Choice {
         match x.to_ascii_lowercase() {
             'a' | 'x' => return Choice::Rock,
@@ -24,71 +32,60 @@ impl Choice{
     }
 }
 
-fn make_choice(enemy: &Choice, outcome: char) -> Choice {
-    match outcome.to_ascii_lowercase() {
-        'x' => {
-            match enemy {
-                Choice::Rock => return Choice::Scissor,
-                Choice::Paper => return Choice::Rock,
-                Choice::Scissor => return Choice::Paper,
-            }
-        }
-        'y' => {
-            match enemy {
-                Choice::Rock => return Choice::Rock,
-                Choice::Paper => return Choice::Paper,
-                Choice::Scissor => return Choice::Scissor,
-            }
-        }
-        'z' => {
-            match enemy {
-                Choice::Rock => return Choice::Paper,
-                Choice::Paper => return Choice::Scissor,
-                Choice::Scissor => return Choice::Rock,
-            }
-        }
-        _ => panic!("Invalid input"),
-    }
-
+fn make_choice(enemy: &Choice, outcome: Result) -> Choice {
+    //        Rock    Paper     Scissor
+    // Loose Scissor  Rock      Paper
+    // Draw   Rock    Paper     Scissor
+    // Win    Paper  Scissor     Rock
+    let matrix = arr2(&[
+                      [Choice::Scissor, Choice::Rock, Choice::Paper],
+                      [Choice::Rock, Choice::Paper, Choice::Scissor],
+                      [Choice::Paper, Choice::Scissor, Choice::Rock],
+    ]);
+    let row: usize = outcome as usize;
+    let column: usize = (enemy.get_value() - 1) as usize;
+    return matrix.get((row, column)).expect("Result not found.").clone();
 }
 
-fn get_row_result(line: String, pick_choice: bool) -> i32 {
+fn get_row_result(line: String, given_result: bool) -> i32 {
     let mut itter = line.chars();
     let their = Choice::new(itter.next().expect("Row does not contain any chars"));
     let _ = itter.next();
-    let our:Choice;
-    if pick_choice {
-        our = make_choice(&their, itter.next().expect("Row does not contain any chars"));
-    } else {
-        our = Choice::new(itter.next().expect("Row does not contain any chars"));
-    }
-    return match_result(&our, &their) + our.get_value();
+    let our = itter.next().expect("Row does not contain any chars");
+    let our_choice:Choice;
+    if given_result {
+        let result: Result;
+        match our.to_ascii_uppercase() {
+            'X' => result = Result::Loss,
+            'Y' => result = Result::Draw,
+            'Z' => result = Result::Win,
+            _ => panic!("Bad format of data."),
+        }
+        our_choice = make_choice(&their, result);
+        println!("{}", result as i32);
+        return result as i32 * 3 + our_choice.get_value();
+    } 
+    our_choice = Choice::new(our);
+    return match_result(&our_choice, &their) + our_choice.get_value();
 }
 
 fn match_result(player: &Choice, enemy: &Choice) -> i32{
-    match player {
-        Choice::Rock => {
-            match enemy{
-                Choice::Rock => return 3,
-                Choice::Paper => return 0,
-                Choice::Scissor => return 6,
-            }
-        }
-        Choice::Paper => {
-            match enemy{
-                Choice::Rock => return 6,
-                Choice::Paper => return 3,
-                Choice::Scissor => return 0,
-            }
-        }
-        Choice::Scissor => {
-            match enemy{
-                Choice::Rock => return 0,
-                Choice::Paper => return 6,
-                Choice::Scissor => return 3,
-            }
-        }
-    }
+    //   Result table based on choices where
+    //   Where 
+    //   0 = Rock
+    //   1 = Paper
+    //   2 = Scissor
+    //   
+    //   0 1 2
+    // 0 3 0 6
+    // 1 6 3 0
+    // 2 0 6 3
+    let matrix = arr2(&[[3, 0, 6],
+                        [6, 3, 0],
+                        [0, 6, 3]]);
+    let row: usize = (player.get_value() - 1) as usize;
+    let column: usize = (enemy.get_value() - 1) as usize;
+    return matrix.get((row, column)).expect("Result not found.").clone();
 }
 
 fn main() {
