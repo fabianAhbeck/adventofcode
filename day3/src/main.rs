@@ -82,7 +82,6 @@ fn main() {
         if (j + 1) % 3 == 0 {
             let common_item = find_common_item(group);
             badge_sum += common_item.prio;
-            println!("{}", common_item.character);
             group = Vec::new();
         }
     }

@@ -62,7 +62,6 @@ fn get_row_result(line: String, given_result: bool) -> i32 {
             _ => panic!("Bad format of data."),
         }
         our_choice = make_choice(&their, result);
-        println!("{}", result as i32);
         return result as i32 * 3 + our_choice.get_value();
     } 
     our_choice = Choice::new(our);
