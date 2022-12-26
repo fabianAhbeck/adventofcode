@@ -1,10 +1,12 @@
-use std::fs;
+use std::fs::read_to_string;
 
-struct Rugsack{
+// Struct for an elf's Rugsack
+struct Rugsack {
     first: Vec<Item>,
     second: Vec<Item>,
 }
 
+// Struct for an item that an elf can carry
 #[derive(Copy, Clone, PartialEq, Eq)]
 struct Item {
     character: char,
@@ -13,13 +15,13 @@ struct Item {
 
 impl Rugsack {
     fn contains(&self, item: &Item) -> bool {
-        if self.first.contains(&item) || self.second.contains(&item){
+        if self.first.contains(item) || self.second.contains(item) {
             return true;
         }
-        return false;
+        false
     }
     fn find_duplicate(&self) -> Item {
-        for i in self.first.clone(){
+        for i in self.first.clone() {
             if self.second.contains(&i) {
                 return i;
             }
@@ -29,29 +31,34 @@ impl Rugsack {
 }
 
 fn build_rugsack(content: String) -> Rugsack {
-    let mut rs = Rugsack{ first: Vec::new(), second: Vec::new()};
-    for (i, char) in content.chars().enumerate(){
+    let mut rs = Rugsack {
+        first: Vec::new(),
+        second: Vec::new(),
+    };
+    for (i, char) in content.chars().enumerate() {
         let item = build_item(char);
-        if content.len()/2 > i {
+        if content.len() / 2 > i {
             rs.first.push(item);
         } else {
             rs.second.push(item);
         }
     }
-    return rs;
+    rs
 }
 
 fn build_item(item_code: char) -> Item {
-    let num: u32;
-    if item_code.is_lowercase() {
-        num = item_code as u32 - 96;
+    let num: u32 = if item_code.is_lowercase() {
+        item_code as u32 - 96
     } else {
-        num = item_code as u32 - 38;
+        item_code as u32 - 38
+    };
+    Item {
+        character: item_code,
+        prio: num,
     }
-    return Item{ character: item_code, prio: num }
 }
 
-fn find_common_item(group: Vec<Rugsack>) -> Item{
+fn find_common_item(group: Vec<Rugsack>) -> Item {
     if group.len() != 3 {
         panic!("Invalid group length");
     }
@@ -69,12 +76,12 @@ fn find_common_item(group: Vec<Rugsack>) -> Item{
 }
 
 fn main() {
-    let data = fs::read_to_string("input")
+    let data = read_to_string("input")
         .expect("Input file to be created and readable");
     let mut duplicate_sum = 0;
     let mut badge_sum = 0;
     let mut group: Vec<Rugsack> = Vec::new();
-    for (j, line) in data.lines().enumerate(){
+    for (j, line) in data.lines().enumerate() {
         let rs = build_rugsack(line.to_string());
         let duplicate = rs.find_duplicate();
         duplicate_sum += duplicate.prio;

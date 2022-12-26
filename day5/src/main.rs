@@ -1,12 +1,16 @@
 use std::collections::HashMap;
-use std::fs;
+use std::fs::read_to_string;
 
 fn main() {
-    let data = fs::read_to_string("input").expect("Input file to be created and readable");
+    let data = read_to_string("input")
+        .expect("Input file to be created and readable");
+    // get the inital state from the file content
     let header = data.lines().take(8).collect::<String>();
     let initial_state = get_inital_state(&header);
+    // Create two stacks, one for each moving method
     let mut stacks = initial_state.clone();
     let mut stacks_advanced = initial_state;
+    // Print out the initial state
     print_stack(&stacks);
     println!();
     for line in data.lines().skip(10) {
@@ -23,6 +27,7 @@ fn main() {
     print_stack(&stacks_advanced);
 }
 
+// Move boxes between two stacks, one at a time
 fn move_boxes(num_to_move: i32, from: i32, to: i32, stacks: &mut HashMap<i32, Vec<String>>) {
     println!("Moving {} boxes from {} to {}", num_to_move, from, to);
     for _ in 0..num_to_move {
@@ -30,11 +35,13 @@ fn move_boxes(num_to_move: i32, from: i32, to: i32, stacks: &mut HashMap<i32, Ve
         stacks.get_mut(&to).unwrap().push(temp);
     }
 }
+
+// Move boxes between two stacks, several in one lift
 fn move_boxes_advanced(
     num_to_move: i32,
     from: i32,
     to: i32,
-    stacks: &mut HashMap<i32, Vec<String>>,
+    stacks: &mut HashMap<i32, Vec<String>>
 ) {
     let mut temp: Vec<String> = Vec::new();
     for _ in 0..num_to_move {
@@ -44,6 +51,7 @@ fn move_boxes_advanced(
     stacks.get_mut(&to).unwrap().append(&mut temp);
 }
 
+// Print out the stacks
 fn print_stack(stacks: &HashMap<i32, Vec<String>>) {
     for i in 1..10 {
         for item in stacks[&i].iter() {
@@ -53,6 +61,7 @@ fn print_stack(stacks: &HashMap<i32, Vec<String>>) {
     }
 }
 
+// Get the initial state of the stacks based on the input
 fn get_inital_state(header: &str) -> HashMap<i32, Vec<String>> {
     let mut initial: HashMap<i32, Vec<String>> = HashMap::new();
     for i in 1..10 {
