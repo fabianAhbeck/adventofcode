@@ -6,9 +6,9 @@ fn main() {
     let header = data.lines().take(8).collect::<String>();
     let initial_state = get_inital_state(&header);
     let mut stacks = initial_state.clone();
-    let mut stacks_advanced = initial_state.clone();
+    let mut stacks_advanced = initial_state;
     print_stack(&stacks);
-    println!("");
+    println!();
     for line in data.lines().skip(10) {
         let words: Vec<&str> = line.split(' ').collect();
         let number: i32 = words[1].parse().unwrap();
@@ -22,7 +22,7 @@ fn main() {
     println!("Level 2:");
     print_stack(&stacks_advanced);
 }
- 
+
 fn move_boxes(num_to_move: i32, from: i32, to: i32, stacks: &mut HashMap<i32, Vec<String>>) {
     println!("Moving {} boxes from {} to {}", num_to_move, from, to);
     for _ in 0..num_to_move {
@@ -30,7 +30,12 @@ fn move_boxes(num_to_move: i32, from: i32, to: i32, stacks: &mut HashMap<i32, Ve
         stacks.get_mut(&to).unwrap().push(temp);
     }
 }
-fn move_boxes_advanced(num_to_move: i32, from: i32, to: i32, stacks: &mut HashMap<i32, Vec<String>>) {
+fn move_boxes_advanced(
+    num_to_move: i32,
+    from: i32,
+    to: i32,
+    stacks: &mut HashMap<i32, Vec<String>>,
+) {
     let mut temp: Vec<String> = Vec::new();
     for _ in 0..num_to_move {
         temp.push(stacks.get_mut(&from).unwrap().pop().unwrap());
@@ -40,35 +45,31 @@ fn move_boxes_advanced(num_to_move: i32, from: i32, to: i32, stacks: &mut HashMa
 }
 
 fn print_stack(stacks: &HashMap<i32, Vec<String>>) {
-    for i in 1..10{
+    for i in 1..10 {
         for item in stacks[&i].iter() {
             print!("{}", item);
         }
-        println!("");
+        println!();
     }
 }
 
-fn get_inital_state(header: &String) -> HashMap<i32, Vec<String>> {
+fn get_inital_state(header: &str) -> HashMap<i32, Vec<String>> {
     let mut initial: HashMap<i32, Vec<String>> = HashMap::new();
     for i in 1..10 {
         let stack: Vec<String> = Vec::new();
         initial.insert(i, stack);
     }
     for line in (0..8).rev() {
-        for column in 1..10 as i32 {
+        for column in 1..10_i32 {
             // Length of each box is 4 so offset for each column
-            let mut offset: usize = (column -1) as usize * 4;
+            let mut offset: usize = (column - 1) as usize * 4;
             // Skip number of chars per line for each line
             offset += line * 35;
-            let section: String = header
-                .chars()
-                .skip(offset + 1)
-                .take(1)
-                .collect::<String>();
+            let section: String = header.chars().skip(offset + 1).take(1).collect::<String>();
             if section.trim() != "" {
                 initial.get_mut(&column).unwrap().push(section);
             }
         }
     }
-    return initial;
+    initial
 }
